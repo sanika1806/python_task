@@ -1,64 +1,69 @@
-import pandas as pd
+import openpyxl
+from openpyxl import Workbook
 import os
 
-# Define the Excel file name
-excel_file = 'users.xlsx'
+# Define the file path for the Excel file
+excel_file = "user_data.xlsx"
 
-def display_menu():
-    # Display the menu options to the user.
+# Function to add a new user
+def add_user():
+    # Get user details
+    name = input("Enter Name: ")
+    email = input("Enter Email: ")
+    phone = input("Enter Phone Number: ")
+    
+    # Check if the Excel file exists; if not, create it
+    if not os.path.exists(excel_file):
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = "Users"
+        # Create headers
+        sheet.append(["Name", "Email", "Phone Number"])
+        workbook.save(excel_file)
+    
+    # Load the workbook and select the active sheet
+    workbook = openpyxl.load_workbook(excel_file)
+    sheet = workbook.active
+    
+    # Append user data to the sheet
+    sheet.append([name, email, phone])
+    workbook.save(excel_file)
+    print("User added successfully!")
+
+# Function to display all users
+def display_users():
+    # Check if the Excel file exists
+    if not os.path.exists(excel_file):
+        print("No users found. Please add a user first.")
+        return
+    
+    # Load the workbook and select the active sheet
+    workbook = openpyxl.load_workbook(excel_file)
+    sheet = workbook.active
+    
+    # Display users in a readable format
+    print("\nStored Users:")
+    for row in sheet.iter_rows(values_only=True):
+        print(f"Name: {row[0]}, Email: {row[1]}, Phone Number: {row[2]}")
+    print()
+
+# Main program loop
+while True:
     print("Make a choice to proceed :-")
+
+  
     print("Press '1' to Add user.")
     print("Press '2' to Display users.")
     print("press '3' to Exit.")
-
-def add_user():
-    # Prompt the user to enter their details and save them in an Excel file.
-    name = input("Enter the name: ")
-    email = input("Enter the email: ")
-    phone = input("Enter the phone number: ")
-
-    # Create a DataFrame from the user input
-    user_data = pd.DataFrame({
-        'Name': [name],
-        'Email': [email],
-        'Phone': [phone]
-    })
-
-    # Check if the Excel file already exists
-    if os.path.exists(excel_file):
-        # Append the new user data to the existing file
-        user_data.to_excel(excel_file, index=False, header=False, startrow=len(pd.read_excel(excel_file)) + 1)
+    
+    choice = input("Press any key to continue :")
+    
+    if choice == "1":
+        add_user()
+    elif choice == "2":
+        display_users()
+    elif choice == "3":
+        print("Exiting program.")
+        break
     else:
-        # Save the DataFrame to a new Excel file
-        user_data.to_excel(excel_file, index=False)
-
-    print(f"User  '{name}' added successfully.")
-
-def display_users():
-    # Display the list of stored users from the Excel file.
-    if os.path.exists(excel_file):
-        users_df = pd.read_excel(excel_file)
-        print("\nStored Users:")
-        print(users_df.to_string(index=False))
-    else:
-        print("No users found.")
-
-def main():
-    # Main function to run the user management script.
-    while True:
-        display_menu()
-        choice = input("Press any key to continue :")
-
-        if choice == '1':
-            add_user()
-        elif choice == '2':
-            display_users()
-        elif choice == '3':
-            print("Exiting the program.")
-            break
-        else:
-            print("Invalid option. Please try again.")
-
-# Run the main function
-if __name__ == "__main__":
-    main()
+        print("Invalid choice. Please select again.")
